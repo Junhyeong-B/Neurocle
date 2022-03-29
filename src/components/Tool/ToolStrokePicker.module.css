@@ -1,0 +1,13 @@
+.container {
+  border: 1px solid #ccc;
+}
+
+.stroke {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.range {
+  width: 100%;
+}
