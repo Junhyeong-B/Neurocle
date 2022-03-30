@@ -5,6 +5,14 @@ export const RECTANGLE = "RECTANGLE";
 export const POLYGON = "POLYGON";
 export const CLEAR = "CLEAR";
 
+export type ToolType =
+  | typeof STRAIGHT
+  | typeof CURVE
+  | typeof CIRCLE
+  | typeof RECTANGLE
+  | typeof POLYGON
+  | typeof CLEAR;
+
 export const DRAWING_TOOL = [
   {
     id: 0,

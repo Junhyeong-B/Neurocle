@@ -1,11 +1,11 @@
 import { KonvaEventObject } from "konva/lib/Node";
 import { useRef, useState } from "react";
 import { Stage, Layer, Line } from "react-konva";
-import { CLEAR, STRAIGHT } from "../../constants/tool";
+import { CLEAR, STRAIGHT, ToolType } from "../../constants/tool";
 import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
 
 type LinesType = {
-  tool: string;
+  tool: ToolType;
   points: number[];
   color: string;
   stroke: number;
@@ -15,7 +15,7 @@ type LinesType = {
 const Canvas = (): JSX.Element => {
   const [color, setColor] = useState<string>("#000000");
   const [stroke, setStroke] = useState<number>(5);
-  const [tool, setTool] = useState<string>(STRAIGHT);
+  const [tool, setTool] = useState<ToolType>(STRAIGHT);
   const [lines, setLines] = useState<LinesType[]>([]);
   const isDrawing = useRef<boolean>(false);
 
@@ -78,7 +78,7 @@ const Canvas = (): JSX.Element => {
     setStroke(stroke);
   };
 
-  const handleChangeTool = (tool: string) => {
+  const handleChangeTool = (tool: ToolType) => {
     if (tool === CLEAR) {
       setLines([]);
       return;

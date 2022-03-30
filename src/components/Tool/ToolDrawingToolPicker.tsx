@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { CLEAR, DRAWING_TOOL } from "../../constants/tool";
+import { CLEAR, DRAWING_TOOL, ToolType } from "../../constants/tool";
 import styles from "./ToolDrawingToolPicker.module.css";
 
 type Props = {
-  onChangeTool?(tool: string): void;
+  onChangeTool?(tool: ToolType): void;
 };
 
 const DrawingToolPicker = ({ onChangeTool }: Props): JSX.Element => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const handleChange = (type: string, i: number) => {
+  const handleChange = (type: ToolType, i: number) => {
     if (type !== CLEAR) {
       setCurrentIndex(i);
     }
