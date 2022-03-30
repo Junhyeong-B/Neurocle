@@ -1,0 +1,25 @@
+.container {
+  display: flex;
+  gap: 4px;
+}
+
+.tools {
+  border: 1px solid #e5e5e5;
+  width: 80px;
+  text-align: center;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all 200ms ease;
+  color: #023047;
+}
+
+.tools:hover {
+  color: #023047;
+  background-color: #8ecae6;
+}
+
+.tools.select {
+  border: 1px solid #8ecae6;
+  color: #023047;
+  background-color: #8ecae6;
+}

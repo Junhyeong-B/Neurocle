@@ -1,1 +1,1 @@
-export { ColorPicker, StrokePicker } from "./Tool";
+export { ColorPicker, StrokePicker, DrawingToolPicker } from "./Tool";
