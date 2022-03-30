@@ -1,7 +1,8 @@
 import { KonvaEventObject } from "konva/lib/Node";
 import { useRef, useState } from "react";
-import { Stage, Layer, Line } from "react-konva";
-import { CLEAR, STRAIGHT, ToolType } from "../../constants/tool";
+import { Stage, Layer, Line, Circle } from "react-konva";
+import { CIRCLE, CLEAR, STRAIGHT, ToolType } from "../../constants/tool";
+import { getRadius } from "../../utils/circle";
 import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
 
 type LinesType = {
@@ -9,6 +10,7 @@ type LinesType = {
   points: number[];
   color: string;
   stroke: number;
+  diameter?: number;
   direction?: "vertical" | "horizontal";
 };
 
@@ -37,27 +39,40 @@ const Canvas = (): JSX.Element => {
 
     switch (tool) {
       case STRAIGHT:
-        const lastLine = lines[lines.length - 1];
-        const [prevX, prevY] = [lastLine.points[0], lastLine.points[1]];
-        let direction = lastLine.direction;
+        {
+          const lastLine = lines[lines.length - 1];
+          const [prevX, prevY] = [lastLine.points[0], lastLine.points[1]];
+          let direction = lastLine.direction;
 
-        if (!direction) {
-          if (Math.abs(point.x - prevX) < Math.abs(point.y - prevY)) {
-            direction = "vertical";
-            lastLine.direction = "vertical";
-          } else {
-            direction = "horizontal";
-            lastLine.direction = "horizontal";
+          if (!direction) {
+            if (Math.abs(point.x - prevX) < Math.abs(point.y - prevY)) {
+              direction = "vertical";
+              lastLine.direction = "vertical";
+            } else {
+              direction = "horizontal";
+              lastLine.direction = "horizontal";
+            }
           }
+
+          lastLine.points = lastLine.points.concat(
+            direction === "vertical" ? [prevX, point.y] : [point.x, prevY],
+          );
+
+          lines.splice(lines.length - 1, 1, lastLine);
+          setLines(lines.concat());
         }
-
-        lastLine.points = lastLine.points.concat(
-          direction === "vertical" ? [prevX, point.y] : [point.x, prevY],
-        );
-
-        lines.splice(lines.length - 1, 1, lastLine);
-        setLines(lines.concat());
         break;
+      case CIRCLE:
+        {
+          const lastLine = lines[lines.length - 1];
+          const [prevX, prevY] = [lastLine.points[0], lastLine.points[1]];
+          const diameter = getRadius(prevX, prevY, point.x, point.y);
+          lastLine.diameter = diameter;
+
+          lines.splice(lines.length - 1, 1, lastLine);
+          setLines(lines.concat());
+        }
+        return;
       default:
     }
   };
@@ -101,15 +116,31 @@ const Canvas = (): JSX.Element => {
         onMouseLeave={handleMouseLeave}
       >
         <Layer>
-          {lines.map((line, i) => (
-            <Line
-              key={i}
-              points={line.points}
-              stroke={line.color}
-              strokeWidth={line.stroke}
-              globalCompositeOperation={"source-over"}
-            />
-          ))}
+          {lines.map((line, i) => {
+            switch (line.tool) {
+              case STRAIGHT:
+                return (
+                  <Line
+                    key={`${line.tool}-${i}`}
+                    points={line.points}
+                    stroke={line.color}
+                    strokeWidth={line.stroke}
+                    globalCompositeOperation={"source-over"}
+                  />
+                );
+              case CIRCLE:
+                const [x, y] = line.points;
+                return (
+                  <Circle
+                    key={`${line.tool}-${i}`}
+                    x={x}
+                    y={y}
+                    radius={line.diameter}
+                    fill={line.color}
+                  />
+                );
+            }
+          })}
         </Layer>
       </Stage>
     </div>
