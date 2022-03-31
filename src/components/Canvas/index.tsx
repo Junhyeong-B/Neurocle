@@ -48,70 +48,60 @@ const Canvas = (): JSX.Element => {
 
     const stage = e.target.getStage()!;
     const point = stage.getPointerPosition()!;
+    const lastPath = paths[paths.length - 1];
+    const [startX, startY] = [lastPath.points[0], lastPath.points[1]];
 
     switch (tool) {
       case STRAIGHT:
-        {
-          const lastPath = paths[paths.length - 1];
-          const [startX, startY] = [lastPath.points[0], lastPath.points[1]];
-          const data = getStraightPath({
-            startX,
-            startY,
-            endX: point.x,
-            endY: point.y,
-          });
-          lastPath.data = data;
+        const straightPathData = getStraightPath({
+          startX,
+          startY,
+          endX: point.x,
+          endY: point.y,
+        });
+        lastPath.data = straightPathData;
 
-          [lastPath.points[2], lastPath.points[3]] = [point.x, point.y];
+        [lastPath.points[2], lastPath.points[3]] = [point.x, point.y];
 
-          paths.splice(paths.length - 1, 1, lastPath);
-          setPaths(paths.concat());
-        }
+        paths.splice(paths.length - 1, 1, lastPath);
+        setPaths(paths.concat());
         break;
       case CIRCLE:
-        {
-          const lastPath = paths[paths.length - 1];
-          const [centerX, centerY] = [lastPath.points[0], lastPath.points[1]];
-          const radius = getRadius(centerX, centerY, point.x, point.y);
-          const data = getCirclePath({ centerX, centerY, radius });
-          lastPath.data = data;
+        const radius = getRadius(startX, startY, point.x, point.y);
+        const circlePathData = getCirclePath({
+          centerX: startX,
+          centerY: startY,
+          radius,
+        });
+        lastPath.data = circlePathData;
 
-          paths.splice(paths.length - 1, 1, lastPath);
-          setPaths(paths.concat());
-        }
+        paths.splice(paths.length - 1, 1, lastPath);
+        setPaths(paths.concat());
         break;
       case RECTANGLE:
-        {
-          const lastPath = paths[paths.length - 1];
-          const [startX, startY] = [lastPath.points[0], lastPath.points[1]];
-          const data = getRectanglePath({
-            startX,
-            startY,
-            x: point.x,
-            y: point.y,
-          });
-          lastPath.data = data;
+        const rectanglePathData = getRectanglePath({
+          startX,
+          startY,
+          x: point.x,
+          y: point.y,
+        });
+        lastPath.data = rectanglePathData;
 
-          paths.splice(paths.length - 1, 1, lastPath);
-          setPaths(paths.concat());
-        }
+        paths.splice(paths.length - 1, 1, lastPath);
+        setPaths(paths.concat());
         break;
       case POLYGON:
-        {
-          const lastPath = paths[paths.length - 1];
-          const [centerX, centerY] = [lastPath.points[0], lastPath.points[1]];
-          const size = getRadius(centerX, centerY, point.x, point.y);
-          const data = getPolygonPath({
-            centerX,
-            centerY,
-            size,
-            sides: stroke,
-          });
-          lastPath.data = data;
+        const size = getRadius(startX, startY, point.x, point.y) * 2;
+        const polygonPathData = getPolygonPath({
+          centerX: startX,
+          centerY: startY,
+          size,
+          sides: stroke,
+        });
+        lastPath.data = polygonPathData;
 
-          paths.splice(paths.length - 1, 1, lastPath);
-          setPaths(paths.concat());
-        }
+        paths.splice(paths.length - 1, 1, lastPath);
+        setPaths(paths.concat());
         break;
       default:
     }
