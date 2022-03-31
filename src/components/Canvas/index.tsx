@@ -1,17 +1,18 @@
 import { KonvaEventObject } from "konva/lib/Node";
 import { useRef, useState } from "react";
-import { Stage, Layer, Line, Circle } from "react-konva";
+import { Stage, Layer, Circle, Path } from "react-konva";
 import { CIRCLE, CLEAR, STRAIGHT, ToolType } from "../../constants/tool";
 import { getRadius } from "../../utils/circle";
 import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
+import { getStraightPath } from "../../utils/path";
 
 type LinesType = {
   tool: ToolType;
   points: number[];
   color: string;
   stroke: number;
+  data?: string;
   diameter?: number;
-  direction?: "vertical" | "horizontal";
 };
 
 const Canvas = (): JSX.Element => {
@@ -42,21 +43,15 @@ const Canvas = (): JSX.Element => {
         {
           const lastLine = lines[lines.length - 1];
           const [prevX, prevY] = [lastLine.points[0], lastLine.points[1]];
-          let direction = lastLine.direction;
+          const data = getStraightPath({
+            prevX,
+            prevY,
+            endX: point.x,
+            endY: point.y,
+          });
+          lastLine.data = data;
 
-          if (!direction) {
-            if (Math.abs(point.x - prevX) < Math.abs(point.y - prevY)) {
-              direction = "vertical";
-              lastLine.direction = "vertical";
-            } else {
-              direction = "horizontal";
-              lastLine.direction = "horizontal";
-            }
-          }
-
-          lastLine.points = lastLine.points.concat(
-            direction === "vertical" ? [prevX, point.y] : [point.x, prevY],
-          );
+          [lastLine.points[2], lastLine.points[3]] = [point.x, point.y];
 
           lines.splice(lines.length - 1, 1, lastLine);
           setLines(lines.concat());
@@ -72,7 +67,7 @@ const Canvas = (): JSX.Element => {
           lines.splice(lines.length - 1, 1, lastLine);
           setLines(lines.concat());
         }
-        return;
+        break;
       default:
     }
   };
@@ -120,12 +115,13 @@ const Canvas = (): JSX.Element => {
             switch (line.tool) {
               case STRAIGHT:
                 return (
-                  <Line
+                  <Path
                     key={`${line.tool}-${i}`}
-                    points={line.points}
+                    data={line.data}
                     stroke={line.color}
                     strokeWidth={line.stroke}
-                    globalCompositeOperation={"source-over"}
+                    lineCap="round"
+                    lineJoin="round"
                   />
                 );
               case CIRCLE:
