@@ -4,6 +4,7 @@ import { Stage, Layer, Path } from "react-konva";
 import {
   CIRCLE,
   CLEAR,
+  POLYGON,
   RECTANGLE,
   STRAIGHT,
   ToolType,
@@ -12,10 +13,10 @@ import { getRadius } from "../../utils/circle";
 import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
 import {
   getCirclePath,
+  getPolygonPath,
   getRectanglePath,
   getStraightPath,
 } from "../../utils/path";
-import SVGDEMO from "./SVGDEMO";
 
 type PathsType = {
   tool: ToolType;
@@ -95,6 +96,23 @@ const Canvas = (): JSX.Element => {
           setPaths(paths.concat());
         }
         break;
+      case POLYGON:
+        {
+          const lastPath = paths[paths.length - 1];
+          const [centerX, centerY] = [lastPath.points[0], lastPath.points[1]];
+          const size = getRadius(centerX, centerY, point.x, point.y);
+          const data = getPolygonPath({
+            centerX,
+            centerY,
+            size,
+            sides: stroke,
+          });
+          lastPath.data = data;
+
+          paths.splice(paths.length - 1, 1, lastPath);
+          setPaths(paths.concat());
+        }
+        break;
       default:
     }
   };
@@ -126,7 +144,6 @@ const Canvas = (): JSX.Element => {
 
   return (
     <div>
-      <SVGDEMO />
       <ColorPicker color={color} onColorChange={handleColorChange} />
       <StrokePicker stroke={stroke} onStrokeChange={handleStrokeChange} />
       <DrawingToolPicker onChangeTool={handleChangeTool} />
@@ -153,14 +170,8 @@ const Canvas = (): JSX.Element => {
                   />
                 );
               case CIRCLE:
-                return (
-                  <Path
-                    key={`${path.tool}-${i}`}
-                    data={path.data}
-                    fill={path.color}
-                  />
-                );
               case RECTANGLE:
+              case POLYGON:
                 return (
                   <Path
                     key={`${path.tool}-${i}`}

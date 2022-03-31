@@ -25,3 +25,9 @@ export const getRectanglePath = ({ startX, startY, x, y }) => {
 
   return path.pathData.join(" ");
 };
+
+export const getPolygonPath = ({ centerX, centerY, size, sides }) => {
+  const path = new Path().regPolygon(size, sides, centerX, centerY);
+
+  return path.pathData.join(" ");
+};
