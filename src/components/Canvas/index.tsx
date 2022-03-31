@@ -7,7 +7,7 @@ import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
 import { getCirclePath, getStraightPath } from "../../utils/path";
 import SVGDEMO from "./SVGDEMO";
 
-type LinesType = {
+type PathsType = {
   tool: ToolType;
   points: number[];
   color: string;
@@ -19,7 +19,7 @@ const Canvas = (): JSX.Element => {
   const [color, setColor] = useState<string>("#000000");
   const [stroke, setStroke] = useState<number>(5);
   const [tool, setTool] = useState<ToolType>(STRAIGHT);
-  const [lines, setLines] = useState<LinesType[]>([]);
+  const [paths, setPaths] = useState<PathsType[]>([]);
   const isDrawing = useRef<boolean>(false);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
@@ -27,7 +27,7 @@ const Canvas = (): JSX.Element => {
     const stage = e.target.getStage()!;
     const point = stage.getPointerPosition()!;
 
-    setLines([...lines, { tool, points: [point.x, point.y], color, stroke }]);
+    setPaths([...paths, { tool, points: [point.x, point.y], color, stroke }]);
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
@@ -41,32 +41,32 @@ const Canvas = (): JSX.Element => {
     switch (tool) {
       case STRAIGHT:
         {
-          const lastLine = lines[lines.length - 1];
-          const [startX, startY] = [lastLine.points[0], lastLine.points[1]];
+          const lastPath = paths[paths.length - 1];
+          const [startX, startY] = [lastPath.points[0], lastPath.points[1]];
           const data = getStraightPath({
             startX,
             startY,
             endX: point.x,
             endY: point.y,
           });
-          lastLine.data = data;
+          lastPath.data = data;
 
-          [lastLine.points[2], lastLine.points[3]] = [point.x, point.y];
+          [lastPath.points[2], lastPath.points[3]] = [point.x, point.y];
 
-          lines.splice(lines.length - 1, 1, lastLine);
-          setLines(lines.concat());
+          paths.splice(paths.length - 1, 1, lastPath);
+          setPaths(paths.concat());
         }
         break;
       case CIRCLE:
         {
-          const lastLine = lines[lines.length - 1];
-          const [centerX, centerY] = [lastLine.points[0], lastLine.points[1]];
+          const lastPath = paths[paths.length - 1];
+          const [centerX, centerY] = [lastPath.points[0], lastPath.points[1]];
           const radius = getRadius(centerX, centerY, point.x, point.y);
           const data = getCirclePath({ centerX, centerY, radius });
-          lastLine.data = data;
+          lastPath.data = data;
 
-          lines.splice(lines.length - 1, 1, lastLine);
-          setLines(lines.concat());
+          paths.splice(paths.length - 1, 1, lastPath);
+          setPaths(paths.concat());
         }
         break;
       default:
@@ -91,7 +91,7 @@ const Canvas = (): JSX.Element => {
 
   const handleChangeTool = (tool: ToolType) => {
     if (tool === CLEAR) {
-      setLines([]);
+      setPaths([]);
       return;
     }
 
@@ -113,15 +113,15 @@ const Canvas = (): JSX.Element => {
         onMouseLeave={handleMouseLeave}
       >
         <Layer>
-          {lines.map((line, i) => {
-            switch (line.tool) {
+          {paths.map((path, i) => {
+            switch (path.tool) {
               case STRAIGHT:
                 return (
                   <Path
-                    key={`${line.tool}-${i}`}
-                    data={line.data}
-                    stroke={line.color}
-                    strokeWidth={line.stroke}
+                    key={`${path.tool}-${i}`}
+                    data={path.data}
+                    stroke={path.color}
+                    strokeWidth={path.stroke}
                     lineCap="round"
                     lineJoin="round"
                   />
@@ -129,11 +129,11 @@ const Canvas = (): JSX.Element => {
               case CIRCLE:
                 return (
                   <Path
-                    key={`${line.tool}-${i}`}
-                    data={line.data}
-                    stroke={line.color}
-                    strokeWidth={line.stroke}
-                    fill={line.color}
+                    key={`${path.tool}-${i}`}
+                    data={path.data}
+                    stroke={path.color}
+                    strokeWidth={path.stroke}
+                    fill={path.color}
                   />
                 );
             }
