@@ -1,10 +1,11 @@
 import { KonvaEventObject } from "konva/lib/Node";
 import { useRef, useState } from "react";
-import { Stage, Layer, Circle, Path } from "react-konva";
+import { Stage, Layer, Path } from "react-konva";
 import { CIRCLE, CLEAR, STRAIGHT, ToolType } from "../../constants/tool";
 import { getRadius } from "../../utils/circle";
 import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
-import { getStraightPath } from "../../utils/path";
+import { getCirclePath, getStraightPath } from "../../utils/path";
+import SVGDEMO from "./SVGDEMO";
 
 type LinesType = {
   tool: ToolType;
@@ -12,7 +13,6 @@ type LinesType = {
   color: string;
   stroke: number;
   data?: string;
-  diameter?: number;
 };
 
 const Canvas = (): JSX.Element => {
@@ -42,10 +42,10 @@ const Canvas = (): JSX.Element => {
       case STRAIGHT:
         {
           const lastLine = lines[lines.length - 1];
-          const [prevX, prevY] = [lastLine.points[0], lastLine.points[1]];
+          const [startX, startY] = [lastLine.points[0], lastLine.points[1]];
           const data = getStraightPath({
-            prevX,
-            prevY,
+            startX,
+            startY,
             endX: point.x,
             endY: point.y,
           });
@@ -60,9 +60,10 @@ const Canvas = (): JSX.Element => {
       case CIRCLE:
         {
           const lastLine = lines[lines.length - 1];
-          const [prevX, prevY] = [lastLine.points[0], lastLine.points[1]];
-          const diameter = getRadius(prevX, prevY, point.x, point.y);
-          lastLine.diameter = diameter;
+          const [centerX, centerY] = [lastLine.points[0], lastLine.points[1]];
+          const radius = getRadius(centerX, centerY, point.x, point.y);
+          const data = getCirclePath({ centerX, centerY, radius });
+          lastLine.data = data;
 
           lines.splice(lines.length - 1, 1, lastLine);
           setLines(lines.concat());
@@ -99,6 +100,7 @@ const Canvas = (): JSX.Element => {
 
   return (
     <div>
+      <SVGDEMO />
       <ColorPicker color={color} onColorChange={handleColorChange} />
       <StrokePicker stroke={stroke} onStrokeChange={handleStrokeChange} />
       <DrawingToolPicker onChangeTool={handleChangeTool} />
@@ -125,13 +127,12 @@ const Canvas = (): JSX.Element => {
                   />
                 );
               case CIRCLE:
-                const [x, y] = line.points;
                 return (
-                  <Circle
+                  <Path
                     key={`${line.tool}-${i}`}
-                    x={x}
-                    y={y}
-                    radius={line.diameter}
+                    data={line.data}
+                    stroke={line.color}
+                    strokeWidth={line.stroke}
                     fill={line.color}
                   />
                 );
