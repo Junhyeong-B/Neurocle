@@ -11,3 +11,17 @@ export const getCirclePath = ({ centerX, centerY, radius }) => {
 
   return path.pathData.join(" ");
 };
+
+export const getRectanglePath = ({ startX, startY, x, y }) => {
+  const width = x - startX;
+  const height = y - startY;
+
+  const path = new Path()
+    .moveTo(startX, startY)
+    .right(width)
+    .down(height)
+    .left(width)
+    .close();
+
+  return path.pathData.join(" ");
+};

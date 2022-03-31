@@ -1,10 +1,20 @@
 import { KonvaEventObject } from "konva/lib/Node";
 import { useRef, useState } from "react";
 import { Stage, Layer, Path } from "react-konva";
-import { CIRCLE, CLEAR, STRAIGHT, ToolType } from "../../constants/tool";
+import {
+  CIRCLE,
+  CLEAR,
+  RECTANGLE,
+  STRAIGHT,
+  ToolType,
+} from "../../constants/tool";
 import { getRadius } from "../../utils/circle";
 import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
-import { getCirclePath, getStraightPath } from "../../utils/path";
+import {
+  getCirclePath,
+  getRectanglePath,
+  getStraightPath,
+} from "../../utils/path";
 import SVGDEMO from "./SVGDEMO";
 
 type PathsType = {
@@ -63,6 +73,22 @@ const Canvas = (): JSX.Element => {
           const [centerX, centerY] = [lastPath.points[0], lastPath.points[1]];
           const radius = getRadius(centerX, centerY, point.x, point.y);
           const data = getCirclePath({ centerX, centerY, radius });
+          lastPath.data = data;
+
+          paths.splice(paths.length - 1, 1, lastPath);
+          setPaths(paths.concat());
+        }
+        break;
+      case RECTANGLE:
+        {
+          const lastPath = paths[paths.length - 1];
+          const [startX, startY] = [lastPath.points[0], lastPath.points[1]];
+          const data = getRectanglePath({
+            startX,
+            startY,
+            x: point.x,
+            y: point.y,
+          });
           lastPath.data = data;
 
           paths.splice(paths.length - 1, 1, lastPath);
@@ -131,8 +157,14 @@ const Canvas = (): JSX.Element => {
                   <Path
                     key={`${path.tool}-${i}`}
                     data={path.data}
-                    stroke={path.color}
-                    strokeWidth={path.stroke}
+                    fill={path.color}
+                  />
+                );
+              case RECTANGLE:
+                return (
+                  <Path
+                    key={`${path.tool}-${i}`}
+                    data={path.data}
                     fill={path.color}
                   />
                 );
