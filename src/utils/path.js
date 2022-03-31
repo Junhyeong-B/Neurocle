@@ -31,3 +31,11 @@ export const getPolygonPath = ({ centerX, centerY, size, sides }) => {
 
   return path.pathData.join(" ");
 };
+
+export const getCurvePath = ({ startX, startY, x, y, path }) => {
+  if (!path) {
+    return new Path().moveTo(startX, startY).lineTo(x, y);
+  }
+
+  return path.lineTo(x, y);
+};

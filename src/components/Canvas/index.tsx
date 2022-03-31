@@ -4,6 +4,7 @@ import { Stage, Layer, Path } from "react-konva";
 import {
   CIRCLE,
   CLEAR,
+  CURVE,
   POLYGON,
   RECTANGLE,
   STRAIGHT,
@@ -13,6 +14,7 @@ import { getRadius } from "../../utils/circle";
 import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
 import {
   getCirclePath,
+  getCurvePath,
   getPolygonPath,
   getRectanglePath,
   getStraightPath,
@@ -24,6 +26,11 @@ type PathsType = {
   color: string;
   stroke: number;
   data?: string;
+  curvePath?: ReactSvgPathType;
+};
+
+type ReactSvgPathType = {
+  pathData: string[];
 };
 
 const Canvas = (): JSX.Element => {
@@ -62,6 +69,20 @@ const Canvas = (): JSX.Element => {
         lastPath.data = straightPathData;
 
         [lastPath.points[2], lastPath.points[3]] = [point.x, point.y];
+
+        paths.splice(paths.length - 1, 1, lastPath);
+        setPaths(paths.concat());
+        break;
+      case CURVE:
+        const curvePath = getCurvePath({
+          startX,
+          startY,
+          x: point.x,
+          y: point.y,
+          path: lastPath.curvePath,
+        });
+        lastPath.curvePath = curvePath;
+        lastPath.data = curvePath.pathData.join(" ");
 
         paths.splice(paths.length - 1, 1, lastPath);
         setPaths(paths.concat());
@@ -149,6 +170,7 @@ const Canvas = (): JSX.Element => {
           {paths.map((path, i) => {
             switch (path.tool) {
               case STRAIGHT:
+              case CURVE:
                 return (
                   <Path
                     key={`${path.tool}-${i}`}
