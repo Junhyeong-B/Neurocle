@@ -20,6 +20,7 @@ import {
   getStraightPath,
 } from "../../utils/path";
 import styles from "./Canvas.module.css";
+import { useSessionStorage } from "../../hooks";
 
 type PathsType = {
   tool: ToolType;
@@ -36,12 +37,23 @@ type ReactSvgPathType = {
 };
 
 const Canvas = (): JSX.Element => {
-  const [fillColor, setFillColor] = useState<string>("#000000");
-  const [strokeColor, setStrokeColor] = useState<string>("#000000");
-  const [stroke, setStroke] = useState<number>(5);
-  const [diagonal, setDiagonal] = useState<number>(3);
-  const [tool, setTool] = useState<ToolType>(STRAIGHT);
-  const [paths, setPaths] = useState<PathsType[]>([]);
+  const [storedValue, setStorageValue] = useSessionStorage("CANVAS_JUNHYEONG", {
+    fillColor: "#000000",
+    strokeColor: "#000000",
+    stroke: 5,
+    diagonal: 3,
+    tool: STRAIGHT as typeof STRAIGHT,
+    paths: [],
+  });
+
+  const [strokeColor, setStrokeColor] = useState<string>(
+    storedValue.strokeColor,
+  );
+  const [fillColor, setFillColor] = useState<string>(storedValue.fillColor);
+  const [stroke, setStroke] = useState<number>(storedValue.stroke);
+  const [diagonal, setDiagonal] = useState<number>(storedValue.diagonal);
+  const [tool, setTool] = useState<ToolType>(storedValue.tool);
+  const [paths, setPaths] = useState<PathsType[]>(storedValue.paths);
   const isDrawing = useRef<boolean>(false);
 
   const handleMouseDown = useCallback(
@@ -122,16 +134,21 @@ const Canvas = (): JSX.Element => {
       }
 
       paths.splice(paths.length - 1, 1, lastPath);
-      setPaths(paths.concat());
+      const newPaths = paths.slice();
+      setPaths(newPaths);
+      setStorageValue({
+        fillColor,
+        strokeColor,
+        stroke,
+        diagonal,
+        tool,
+        paths: newPaths,
+      });
     },
-    [paths, tool, diagonal],
+    [paths, tool, diagonal, fillColor, strokeColor, stroke, setStorageValue],
   );
 
-  const handleMouseUp = useCallback(() => {
-    isDrawing.current = false;
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
+  const handleDrawEnd = useCallback(() => {
     isDrawing.current = false;
   }, []);
 
@@ -192,8 +209,7 @@ const Canvas = (): JSX.Element => {
             다각형
           </ValuePicker>
         )}
-
-        <DrawingToolPicker onChangeTool={handleChangeTool} />
+        <DrawingToolPicker currentTool={tool} onChangeTool={handleChangeTool} />
       </div>
       <div className={styles.canvas_container}>
         <Stage
@@ -201,38 +217,39 @@ const Canvas = (): JSX.Element => {
           height={600}
           onMouseDown={handleMouseDown}
           onMousemove={handleMouseMove}
-          onMouseup={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
+          onMouseup={handleDrawEnd}
+          onMouseLeave={handleDrawEnd}
         >
           <Layer>
-            {paths.map((path, i) => {
-              switch (path.tool) {
-                case STRAIGHT:
-                case CURVE:
-                  return (
-                    <Path
-                      key={`${path.tool}-${i}`}
-                      data={path.data}
-                      stroke={path.strokeColor}
-                      strokeWidth={path.stroke}
-                      lineCap="round"
-                      lineJoin="round"
-                    />
-                  );
-                case CIRCLE:
-                case RECTANGLE:
-                case POLYGON:
-                  return (
-                    <Path
-                      key={`${path.tool}-${i}`}
-                      data={path.data}
-                      fill={path.fillColor}
-                      stroke={path.strokeColor}
-                      strokeWidth={path.stroke}
-                    />
-                  );
-              }
-            })}
+            {paths &&
+              paths.map((path, i) => {
+                switch (path.tool) {
+                  case STRAIGHT:
+                  case CURVE:
+                    return (
+                      <Path
+                        key={`${path.tool}-${i}`}
+                        data={path.data}
+                        stroke={path.strokeColor}
+                        strokeWidth={path.stroke}
+                        lineCap="round"
+                        lineJoin="round"
+                      />
+                    );
+                  case CIRCLE:
+                  case RECTANGLE:
+                  case POLYGON:
+                    return (
+                      <Path
+                        key={`${path.tool}-${i}`}
+                        data={path.data}
+                        fill={path.fillColor}
+                        stroke={path.strokeColor}
+                        strokeWidth={path.stroke}
+                      />
+                    );
+                }
+              })}
           </Layer>
         </Stage>
       </div>

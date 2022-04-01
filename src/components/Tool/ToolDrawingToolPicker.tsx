@@ -1,19 +1,18 @@
-import React, { useCallback, useState } from "react";
-import { CLEAR, DRAWING_TOOL, ToolType } from "../../constants/tool";
+import React, { useCallback } from "react";
+import { DRAWING_TOOL, ToolType } from "../../constants/tool";
 import styles from "./ToolDrawingToolPicker.module.css";
 
 type Props = {
   onChangeTool?(tool: ToolType): void;
+  currentTool: ToolType;
 };
 
-const DrawingToolPicker = ({ onChangeTool }: Props): JSX.Element => {
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+const DrawingToolPicker = ({
+  onChangeTool,
+  currentTool,
+}: Props): JSX.Element => {
   const handleChange = useCallback(
-    (type: ToolType, i: number) => {
-      if (type !== CLEAR) {
-        setCurrentIndex(i);
-      }
-
+    (type: ToolType) => {
       onChangeTool && onChangeTool(type);
     },
     [onChangeTool],
@@ -21,11 +20,13 @@ const DrawingToolPicker = ({ onChangeTool }: Props): JSX.Element => {
 
   return (
     <div className={styles.container}>
-      {DRAWING_TOOL.map((tool, i) => (
+      {DRAWING_TOOL.map((tool) => (
         <div
-          className={`${styles.tools} ${i === currentIndex && styles.select}`}
           key={`tool-${tool.id}`}
-          onClick={handleChange.bind(null, tool.type, i)}
+          className={`${styles.tools} ${
+            currentTool === tool.type && styles.select
+          }`}
+          onClick={handleChange.bind(null, tool.type)}
         >
           {tool.name}
         </div>
