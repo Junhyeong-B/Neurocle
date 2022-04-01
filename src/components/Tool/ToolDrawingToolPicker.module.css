@@ -1,13 +1,13 @@
 .container {
   display: flex;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .tools {
   border: 1px solid #e5e5e5;
-  width: 80px;
+  width: 5rem;
   text-align: center;
-  padding: 8px 0;
+  padding: 0.5rem 0;
   cursor: pointer;
   transition: all 200ms ease;
   color: #023047;
@@ -19,7 +19,7 @@
 }
 
 .tools.select {
-  border: 1px solid #8ecae6;
+  border: 0.0625rem solid #8ecae6;
   color: #023047;
   background-color: #8ecae6;
 }
