@@ -1,0 +1,21 @@
+.container {
+  width: fit-content;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 auto;
+  gap: 1rem;
+}
+
+.tool_container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.canvas_container {
+  width: fit-content;
+  height: fit-content;
+  border: 0.0625rem solid;
+}
