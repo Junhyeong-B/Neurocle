@@ -1,5 +1,5 @@
 import { KonvaEventObject } from "konva/lib/Node";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Stage, Layer, Path } from "react-konva";
 import {
   CIRCLE,
@@ -136,8 +136,9 @@ const Canvas = (): JSX.Element => {
         default:
       }
 
-      paths.splice(paths.length - 1, 1, lastPath);
       const newPaths = paths.slice();
+      newPaths.pop();
+      newPaths.push(lastPath);
       setPaths(newPaths);
       setStorageValue({
         fillColor,
@@ -183,9 +184,18 @@ const Canvas = (): JSX.Element => {
     },
     [deleteValue],
   );
+  console.log(paths);
+
+  useEffect(() => {
+    console.log(paths);
+  }, [paths]);
 
   return (
     <div className={styles.container}>
+      <div>
+        <button>Undo</button>
+        <button>Redo</button>
+      </div>
       <div className={styles.tool_container}>
         <ColorPicker color={fillColor} onColorChange={handleFillColorChange}>
           채우기

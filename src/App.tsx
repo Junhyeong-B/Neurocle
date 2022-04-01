@@ -1,5 +1,7 @@
+import { Canvas } from "./components";
+
 function App() {
-  return <div />;
+  return <Canvas />;
 }
 
 export default App;
