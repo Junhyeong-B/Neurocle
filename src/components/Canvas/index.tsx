@@ -19,11 +19,13 @@ import {
   getRectanglePath,
   getStraightPath,
 } from "../../utils/path";
+import styles from "./Canvas.module.css";
 
 type PathsType = {
   tool: ToolType;
   points: number[];
-  color: string;
+  fillColor: string;
+  strokeColor: string;
   stroke: number;
   data?: string;
   curvePath?: ReactSvgPathType;
@@ -34,7 +36,8 @@ type ReactSvgPathType = {
 };
 
 const Canvas = (): JSX.Element => {
-  const [color, setColor] = useState<string>("#000000");
+  const [fillColor, setFillColor] = useState<string>("#000000");
+  const [strokeColor, setStrokeColor] = useState<string>("#000000");
   const [stroke, setStroke] = useState<number>(5);
   const [tool, setTool] = useState<ToolType>(STRAIGHT);
   const [paths, setPaths] = useState<PathsType[]>([]);
@@ -48,10 +51,10 @@ const Canvas = (): JSX.Element => {
 
       setPaths((prevPaths) => [
         ...prevPaths,
-        { tool, points: [point.x, point.y], color, stroke },
+        { tool, points: [point.x, point.y], fillColor, strokeColor, stroke },
       ]);
     },
-    [tool, color, stroke],
+    [tool, fillColor, strokeColor, stroke],
   );
 
   const handleMouseMove = useCallback(
@@ -131,8 +134,12 @@ const Canvas = (): JSX.Element => {
     isDrawing.current = false;
   }, []);
 
-  const handleColorChange = useCallback((color: string) => {
-    setColor(color);
+  const handleFillColorChange = useCallback((color: string) => {
+    setFillColor(color);
+  }, []);
+
+  const handleStrokeColorChange = useCallback((color: string) => {
+    setStrokeColor(color);
   }, []);
 
   const handleStrokeChange = useCallback((stroke: number) => {
@@ -149,47 +156,61 @@ const Canvas = (): JSX.Element => {
   }, []);
 
   return (
-    <div>
-      <ColorPicker color={color} onColorChange={handleColorChange} />
-      <StrokePicker stroke={stroke} onStrokeChange={handleStrokeChange} />
-      <DrawingToolPicker onChangeTool={handleChangeTool} />
-      <Stage
-        width={window.innerWidth}
-        height={window.innerHeight}
-        onMouseDown={handleMouseDown}
-        onMousemove={handleMouseMove}
-        onMouseup={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-      >
-        <Layer>
-          {paths.map((path, i) => {
-            switch (path.tool) {
-              case STRAIGHT:
-              case CURVE:
-                return (
-                  <Path
-                    key={`${path.tool}-${i}`}
-                    data={path.data}
-                    stroke={path.color}
-                    strokeWidth={path.stroke}
-                    lineCap="round"
-                    lineJoin="round"
-                  />
-                );
-              case CIRCLE:
-              case RECTANGLE:
-              case POLYGON:
-                return (
-                  <Path
-                    key={`${path.tool}-${i}`}
-                    data={path.data}
-                    fill={path.color}
-                  />
-                );
-            }
-          })}
-        </Layer>
-      </Stage>
+    <div className={styles.container}>
+      <div className={styles.tool_container}>
+        <ColorPicker color={fillColor} onColorChange={handleFillColorChange}>
+          채우기
+        </ColorPicker>
+        <ColorPicker
+          color={strokeColor}
+          onColorChange={handleStrokeColorChange}
+        >
+          선
+        </ColorPicker>
+        <StrokePicker stroke={stroke} onStrokeChange={handleStrokeChange} />
+        <DrawingToolPicker onChangeTool={handleChangeTool} />
+      </div>
+      <div className={styles.canvas_container}>
+        <Stage
+          width={1000}
+          height={600}
+          onMouseDown={handleMouseDown}
+          onMousemove={handleMouseMove}
+          onMouseup={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+        >
+          <Layer>
+            {paths.map((path, i) => {
+              switch (path.tool) {
+                case STRAIGHT:
+                case CURVE:
+                  return (
+                    <Path
+                      key={`${path.tool}-${i}`}
+                      data={path.data}
+                      stroke={path.strokeColor}
+                      strokeWidth={path.stroke}
+                      lineCap="round"
+                      lineJoin="round"
+                    />
+                  );
+                case CIRCLE:
+                case RECTANGLE:
+                case POLYGON:
+                  return (
+                    <Path
+                      key={`${path.tool}-${i}`}
+                      data={path.data}
+                      fill={path.fillColor}
+                      stroke={path.strokeColor}
+                      strokeWidth={path.stroke}
+                    />
+                  );
+              }
+            })}
+          </Layer>
+        </Stage>
+      </div>
     </div>
   );
 };
