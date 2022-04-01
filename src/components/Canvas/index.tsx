@@ -37,14 +37,17 @@ type ReactSvgPathType = {
 };
 
 const Canvas = (): JSX.Element => {
-  const [storedValue, setStorageValue] = useSessionStorage("CANVAS_JUNHYEONG", {
-    fillColor: "#000000",
-    strokeColor: "#000000",
-    stroke: 5,
-    diagonal: 3,
-    tool: STRAIGHT as typeof STRAIGHT,
-    paths: [],
-  });
+  const [storedValue, setStorageValue, deleteValue] = useSessionStorage(
+    "CANVAS_JUNHYEONG",
+    {
+      fillColor: "#000000",
+      strokeColor: "#000000",
+      stroke: 5,
+      diagonal: 3,
+      tool: STRAIGHT as typeof STRAIGHT,
+      paths: [],
+    },
+  );
 
   const [strokeColor, setStrokeColor] = useState<string>(
     storedValue.strokeColor,
@@ -168,14 +171,18 @@ const Canvas = (): JSX.Element => {
     setDiagonal(diagonal);
   }, []);
 
-  const handleChangeTool = useCallback((tool: ToolType) => {
-    if (tool === CLEAR) {
-      setPaths([]);
-      return;
-    }
+  const handleChangeTool = useCallback(
+    (tool: ToolType) => {
+      if (tool === CLEAR) {
+        setPaths([]);
+        deleteValue();
+        return;
+      }
 
-    setTool(tool);
-  }, []);
+      setTool(tool);
+    },
+    [deleteValue],
+  );
 
   return (
     <div className={styles.container}>

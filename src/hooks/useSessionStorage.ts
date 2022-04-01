@@ -5,7 +5,7 @@ const storage = window.sessionStorage;
 const useSessionStorage = <T>(
   key: string,
   initialValue: T,
-): [T, <T>(value: T) => void] => {
+): [T, <T>(value: T) => void, () => void] => {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = storage.getItem(key);
@@ -27,7 +27,15 @@ const useSessionStorage = <T>(
     }
   };
 
-  return [storedValue, setValue];
+  const deleteValue = () => {
+    try {
+      storage.removeItem(key);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return [storedValue, setValue, deleteValue];
 };
 
 export default useSessionStorage;
