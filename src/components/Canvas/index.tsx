@@ -11,7 +11,7 @@ import {
   ToolType,
 } from "../../constants/tool";
 import { getRadius } from "../../utils/circle";
-import { ColorPicker, DrawingToolPicker, StrokePicker } from "../Tool";
+import { ColorPicker, DrawingToolPicker, ValuePicker } from "../Tool";
 import {
   getCirclePath,
   getCurvePath,
@@ -39,6 +39,7 @@ const Canvas = (): JSX.Element => {
   const [fillColor, setFillColor] = useState<string>("#000000");
   const [strokeColor, setStrokeColor] = useState<string>("#000000");
   const [stroke, setStroke] = useState<number>(5);
+  const [diagonal, setDiagonal] = useState<number>(3);
   const [tool, setTool] = useState<ToolType>(STRAIGHT);
   const [paths, setPaths] = useState<PathsType[]>([]);
   const isDrawing = useRef<boolean>(false);
@@ -113,7 +114,7 @@ const Canvas = (): JSX.Element => {
             centerX: startX,
             centerY: startY,
             size,
-            sides: stroke,
+            sides: diagonal,
           });
           lastPath.data = polygonPathData;
           break;
@@ -123,7 +124,7 @@ const Canvas = (): JSX.Element => {
       paths.splice(paths.length - 1, 1, lastPath);
       setPaths(paths.concat());
     },
-    [paths, stroke, tool],
+    [paths, tool, diagonal],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -144,6 +145,10 @@ const Canvas = (): JSX.Element => {
 
   const handleStrokeChange = useCallback((stroke: number) => {
     setStroke(stroke);
+  }, []);
+
+  const handleDiagonalChange = useCallback((diagonal: number) => {
+    setDiagonal(diagonal);
   }, []);
 
   const handleChangeTool = useCallback((tool: ToolType) => {
@@ -167,7 +172,27 @@ const Canvas = (): JSX.Element => {
         >
           선
         </ColorPicker>
-        <StrokePicker stroke={stroke} onStrokeChange={handleStrokeChange} />
+        <ValuePicker
+          value={stroke}
+          onValueChange={handleStrokeChange}
+          min={5}
+          max={50}
+          unit="px"
+        >
+          두께
+        </ValuePicker>
+        {tool === POLYGON && (
+          <ValuePicker
+            value={diagonal}
+            onValueChange={handleDiagonalChange}
+            min={3}
+            max={50}
+            unit="개"
+          >
+            다각형
+          </ValuePicker>
+        )}
+
         <DrawingToolPicker onChangeTool={handleChangeTool} />
       </div>
       <div className={styles.canvas_container}>
