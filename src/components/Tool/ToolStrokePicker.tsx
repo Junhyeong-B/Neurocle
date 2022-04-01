@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useCallback } from "react";
 import styles from "./ToolStrokePicker.module.css";
 
 type Props = {
@@ -6,14 +6,17 @@ type Props = {
   onStrokeChange?(stroke: number): void;
 };
 
-const StrokePicker = ({ stroke = 5, onStrokeChange }: Props): JSX.Element => {
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onStrokeChange && onStrokeChange(parseInt(e.target.value, 10));
-  };
+const StrokePicker = ({ stroke, onStrokeChange }: Props): JSX.Element => {
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onStrokeChange && onStrokeChange(parseInt(e.target.value, 10));
+    },
+    [onStrokeChange],
+  );
 
   return (
-    <div className={styles.container}>
-      <div className={styles.stroke}>
+    <div>
+      <div className={styles.display}>
         <span>두께</span>
         <span>{stroke}px</span>
       </div>
