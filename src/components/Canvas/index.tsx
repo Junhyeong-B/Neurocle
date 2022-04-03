@@ -1,5 +1,5 @@
 import { KonvaEventObject } from "konva/lib/Node";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Stage, Layer, Path } from "react-konva";
 import {
   CIRCLE,
@@ -30,6 +30,7 @@ type PathsType = {
   stroke: number;
   data?: string;
   curvePath?: ReactSvgPathType;
+  isDrawing?: boolean;
 };
 
 type ReactSvgPathType = {
@@ -57,6 +58,14 @@ const Canvas = (): JSX.Element => {
   const [diagonal, setDiagonal] = useState<number>(storedValue.diagonal);
   const [tool, setTool] = useState<ToolType>(storedValue.tool);
   const [paths, setPaths] = useState<PathsType[]>(storedValue.paths);
+  const [currentPath, setCurrentPath] = useState<PathsType>({
+    tool: storedValue.tool,
+    points: [0, 0],
+    fillColor: storedValue.fillColor,
+    strokeColor: storedValue.strokeColor,
+    stroke: storedValue.stroke,
+    isDrawing: false,
+  });
   const isDrawing = useRef<boolean>(false);
 
   const handleMouseDown = useCallback(
@@ -65,10 +74,14 @@ const Canvas = (): JSX.Element => {
       const stage = e.target.getStage()!;
       const point = stage.getPointerPosition()!;
 
-      setPaths((prevPaths) => [
-        ...prevPaths,
-        { tool, points: [point.x, point.y], fillColor, strokeColor, stroke },
-      ]);
+      setCurrentPath({
+        tool,
+        points: [point.x, point.y],
+        fillColor,
+        strokeColor,
+        stroke,
+        isDrawing: true,
+      });
     },
     [tool, fillColor, strokeColor, stroke],
   );
@@ -81,65 +94,78 @@ const Canvas = (): JSX.Element => {
 
       const stage = e.target.getStage()!;
       const point = stage.getPointerPosition()!;
-      const lastPath = paths[paths.length - 1];
-      const [startX, startY] = [lastPath.points[0], lastPath.points[1]];
+      setCurrentPath((prevPath) => {
+        const [startX, startY] = [prevPath.points[0], prevPath.points[1]];
+        let data = "";
+        let curvePath: ReactSvgPathType = {
+          pathData: [],
+        };
 
-      switch (tool) {
-        case STRAIGHT:
-          const straightPathData = getStraightPath({
-            startX,
-            startY,
-            endX: point.x,
-            endY: point.y,
-          });
-          lastPath.data = straightPathData;
-          break;
-        case CURVE:
-          const curvePath = getCurvePath({
-            startX,
-            startY,
-            x: point.x,
-            y: point.y,
-            path: lastPath.curvePath,
-          });
-          lastPath.curvePath = curvePath;
-          lastPath.data = curvePath.pathData.join(" ");
-          break;
-        case CIRCLE:
-          const radius = getRadius(startX, startY, point.x, point.y);
-          const circlePathData = getCirclePath({
-            centerX: startX,
-            centerY: startY,
-            radius,
-          });
-          lastPath.data = circlePathData;
-          break;
-        case RECTANGLE:
-          const rectanglePathData = getRectanglePath({
-            startX,
-            startY,
-            x: point.x,
-            y: point.y,
-          });
-          lastPath.data = rectanglePathData;
-          break;
-        case POLYGON:
-          const size = getRadius(startX, startY, point.x, point.y) * 2;
-          const polygonPathData = getPolygonPath({
-            centerX: startX,
-            centerY: startY,
-            size,
-            sides: diagonal,
-          });
-          lastPath.data = polygonPathData;
-          break;
-        default:
-      }
+        switch (tool) {
+          case STRAIGHT:
+            const straightPathData = getStraightPath({
+              startX,
+              startY,
+              endX: point.x,
+              endY: point.y,
+            });
+            data = straightPathData;
+            break;
+          case CURVE:
+            const currentCurvePath = getCurvePath({
+              startX,
+              startY,
+              x: point.x,
+              y: point.y,
+              path: prevPath.curvePath,
+            });
+            curvePath = currentCurvePath;
+            data = curvePath.pathData.join(" ");
+            break;
+          case CIRCLE:
+            const radius = getRadius(startX, startY, point.x, point.y);
+            const circlePathData = getCirclePath({
+              centerX: startX,
+              centerY: startY,
+              radius,
+            });
+            data = circlePathData;
+            break;
+          case RECTANGLE:
+            const rectanglePathData = getRectanglePath({
+              startX,
+              startY,
+              x: point.x,
+              y: point.y,
+            });
+            data = rectanglePathData;
+            break;
+          case POLYGON:
+            const size = getRadius(startX, startY, point.x, point.y) * 2;
+            const polygonPathData = getPolygonPath({
+              centerX: startX,
+              centerY: startY,
+              size,
+              sides: diagonal,
+            });
+            data = polygonPathData;
+            break;
+          default:
+        }
 
-      const newPaths = paths.slice();
-      newPaths.pop();
-      newPaths.push(lastPath);
-      setPaths(newPaths);
+        return {
+          ...prevPath,
+          data,
+          curvePath: curvePath || undefined,
+        };
+      });
+    },
+    [tool, diagonal],
+  );
+
+  const handleDrawEnd = useCallback(() => {
+    setPaths((prevPaths) => {
+      const newPaths = prevPaths.concat(currentPath);
       setStorageValue({
         fillColor,
         strokeColor,
@@ -148,13 +174,23 @@ const Canvas = (): JSX.Element => {
         tool,
         paths: newPaths,
       });
-    },
-    [paths, tool, diagonal, fillColor, strokeColor, stroke, setStorageValue],
-  );
+      return newPaths;
+    });
+    setCurrentPath((prevCurrentPath) => ({
+      ...prevCurrentPath,
+      isDrawing: false,
+    }));
 
-  const handleDrawEnd = useCallback(() => {
     isDrawing.current = false;
-  }, []);
+  }, [
+    fillColor,
+    strokeColor,
+    stroke,
+    diagonal,
+    tool,
+    currentPath,
+    setStorageValue,
+  ]);
 
   const handleFillColorChange = useCallback((color: string) => {
     setFillColor(color);
@@ -184,18 +220,9 @@ const Canvas = (): JSX.Element => {
     },
     [deleteValue],
   );
-  console.log(paths);
-
-  useEffect(() => {
-    console.log(paths);
-  }, [paths]);
 
   return (
     <div className={styles.container}>
-      <div>
-        <button>Undo</button>
-        <button>Redo</button>
-      </div>
       <div className={styles.tool_container}>
         <ColorPicker color={fillColor} onColorChange={handleFillColorChange}>
           채우기
@@ -267,6 +294,18 @@ const Canvas = (): JSX.Element => {
                     );
                 }
               })}
+            {currentPath.isDrawing && (
+              <Path
+                data={currentPath.data}
+                fill={
+                  currentPath.tool === CURVE ? undefined : currentPath.fillColor
+                }
+                stroke={currentPath.strokeColor}
+                strokeWidth={currentPath.stroke}
+                lineCap="round"
+                lineJoin="round"
+              />
+            )}
           </Layer>
         </Stage>
       </div>
