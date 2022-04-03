@@ -164,6 +164,10 @@ const Canvas = (): JSX.Element => {
   );
 
   const handleDrawEnd = useCallback(() => {
+    if (!isDrawing.current) {
+      return;
+    }
+
     setPaths((prevPaths) => {
       const newPaths = prevPaths.concat(currentPath);
       setStorageValue({
