@@ -1,46 +1,50 @@
-# Getting Started with Create React App
+# 벡터(SVG) 기반의 드로잉 툴 구현
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 📌 프로젝트 구성
 
-## Available Scripts
+- Project: `create-react-app`, `Typescript`
+- Convention: `ESLint`, `Prettier`
+- Style: `module CSS`
+- Library: `konva`, `react-konva`, `react-svg-path`
 
-In the project directory, you can run:
+<br />
 
-### `yarn start`
+## 🧑🏻‍💻 실행 방법
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+$yarn
+$yarn start
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+<br />
 
-### `yarn test`
+## 🔎 기능
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+<table align="center">
+<tr>
+<td align="center">색상 변경</td>
+<td align="center">두께 변경</td>
+</tr>
+<tr>
+<td>
+<img src = "https://user-images.githubusercontent.com/85148549/161414964-9c9d33f9-5349-456a-833b-9348266e9698.gif" width="500px" height= "300px" />
+</td>
+<td>
+<img src = "https://user-images.githubusercontent.com/85148549/161414968-3a3f3469-2960-4d00-bd0e-29e75a8371bc.gif" width="500px" height="300px" />
+</td>
+</tr>
+<tr>
+<td align="center">새로고침 시 작업 내용 유지</td>
+<td align="center">그리기 도구(Tool)</td>
+</tr>
+<tr>
+<td>
+<img src="https://user-images.githubusercontent.com/85148549/161414965-3be1408f-b25a-430c-b440-6b0f28cad3c0.gif" width="500px" height="300px" />
+</td>
+<td>
+<img src="https://user-images.githubusercontent.com/85148549/161414967-95f78c64-f6bf-4f3e-a46f-c760c69d88a7.gif" width="500px" height="300px" />
+</td>
+</tr>
+</table>
 
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+<br />
